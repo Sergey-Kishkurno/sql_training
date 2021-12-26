@@ -1,0 +1,8 @@
+_postgresdb
+_db_sourses
+.DS_Store
+.idea
+__pycache__
+/venv
+.env
+
