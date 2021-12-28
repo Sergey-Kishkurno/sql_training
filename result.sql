@@ -5,8 +5,7 @@ from
 (select fc.category_id, count(*)
 from film_category as fc
 join category as c on fc.category_id=c.category_id
-group by fc.category_id) as result,
-category
+group by fc.category_id) as result, category
 where result.category_id=category.category_id
 order by result.count desc
 ;
@@ -15,18 +14,40 @@ order by result.count desc
 -- №2
 -- Вывести 10 актеров, чьи фильмы большего всего арендовали,
 -- отсортировать по убыванию.
-
-
+select fa.actor_id, a.last_name, a.first_name, fa.film_id, f.title, f.rental_duration
+from film_actor fa
+join film f on fa.film_id = f.film_id
+join actor a on fa.actor_id = a.actor_id
+group by fa.actor_id, a.last_name, a.first_name, fa.film_id, f.title, f.rental_duration
+order by rental_duration desc
+limit 10
+;
 
 
 -- №3
 -- Вывести категорию фильмов, на которую потратили больше всего денег.
-
+select c.name, res.sum from category c
+join
+(select fc.category_id, sum(amount)
+from payment p
+join rental r on p.rental_id = r.rental_id
+join inventory i on r.inventory_id =i.inventory_id
+join film_category fc on fc.film_id = i.film_id
+group by fc.category_id
+order by sum desc
+limit 1
+) as res on c.category_id = res.category_id
+;
 
 
 -- №4
 -- Вывести названия фильмов, которых нет в inventory.
 -- Написать запрос без использования оператора IN.
+
+select title from film f
+left join inventory i on f.film_id = i.film_id
+where i.film_id is null
+;
 
 
 
@@ -34,9 +55,20 @@ order by result.count desc
 -- вывести топ 3 актеров, которые больше всего появлялись в фильмах
 -- в категории “Children”.
 -- Если у нескольких актеров одинаковое кол-во фильмов, вывести всех.
-
-
-
+select array_agg(actor_id), films_count
+from
+  (
+  select actor_id, count(actor_id) as films_count
+  from film_actor fa
+  left join film_category fc on fa.film_id = fc.film_id
+  where fc.category_id = 3
+  group by actor_id
+  order by films_count desc
+  ) as t1
+group by films_count
+order by films_count DESC
+limit 3
+;
 
 
 -- №6

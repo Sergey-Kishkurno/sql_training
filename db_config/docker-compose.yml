@@ -2,8 +2,6 @@ version: "3.9"
 
 services:
   postgres:
-    env_file:
-      - ../.env
     image: postgres
     restart: always
     environment:
