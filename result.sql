@@ -2,10 +2,11 @@
 -- Вывести количество фильмов в каждой категории, отсортировать по убыванию.
 select result.category_id, name, result.count
 from
-(select fc.category_id, count(*)
-from film_category as fc
-join category as c on fc.category_id=c.category_id
-group by fc.category_id) as result, category
+    (select fc.category_id, count(*)
+    from film_category as fc
+    join category as c on fc.category_id=c.category_id
+    group by fc.category_id
+    ) as result, category
 where result.category_id=category.category_id
 order by result.count desc
 ;
@@ -28,22 +29,21 @@ limit 10
 -- Вывести категорию фильмов, на которую потратили больше всего денег.
 select c.name, res.sum from category c
 join
-(select fc.category_id, sum(amount)
-from payment p
-join rental r on p.rental_id = r.rental_id
-join inventory i on r.inventory_id =i.inventory_id
-join film_category fc on fc.film_id = i.film_id
-group by fc.category_id
-order by sum desc
-limit 1
-) as res on c.category_id = res.category_id
+    (select fc.category_id, sum(amount)
+    from payment p
+    join rental r on p.rental_id = r.rental_id
+    join inventory i on r.inventory_id =i.inventory_id
+    join film_category fc on fc.film_id = i.film_id
+    group by fc.category_id
+    order by sum desc
+    limit 1
+    ) as res on c.category_id = res.category_id
 ;
 
 
 -- №4
 -- Вывести названия фильмов, которых нет в inventory.
 -- Написать запрос без использования оператора IN.
-
 select title from film f
 left join inventory i on f.film_id = i.film_id
 where i.film_id is null
@@ -69,6 +69,7 @@ group by films_count
 order by films_count DESC
 limit 3
 ;
+-- Примечание: Обычно приложения работают по ID, потому использовано fc.category_id = 3
 
 
 -- №6
@@ -89,5 +90,23 @@ order by c.active
 -- То же самое сделать для городов в которых есть символ “-”.
 -- Написать все в одном запросе.
 
+-- Неоконченный запрос:
+select
+	justify_interval(sum(r.return_date - r.rental_date))
+	, r.inventory_id
+	, r.return_date as end_time
+	, r.rental_date as start_time
+	, ct.city as city_name
+	--, justify_interval(sum(r.return_date - r.rental_date)) as duration
+from rental r
+join customer c on r.customer_id = c.customer_id
+join address a on c.address_id = a.address_id
+join city ct on a.address_id = c.address_id
+group by r.inventory_id
+	, r.return_date
+	, r.rental_date
+	, ct.city
+where ct.city ilike '%-%' or ct.city ilike 'a%'
+;
 
 
